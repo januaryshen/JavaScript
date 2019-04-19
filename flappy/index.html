@@ -1,0 +1,153 @@
+<canvas id = "my-canvas" width = "500" height = "500"></canvas>  <!--html attributes; no comma needed-->
+
+<style>
+    canvas {
+        border: 1px solid black;
+    }
+
+</style>
+
+
+<script>
+
+    /*
+    what we need in the game:
+        bird:
+            x, y of the bird
+            velocity
+            - x
+            - y
+            sprite
+
+        pipes
+        gravity
+        collisions
+        input
+
+        score / high score / low score
+     */
+
+    let mycanvas = document.getElementById("my-canvas");
+    let ctx = mycanvas.getContext("2d"); // has to use this line to use context to render 2d
+
+
+    console.log(mycanvas);
+
+    let bird = {
+        x: 20,   // use column and comma!!!!
+        y: 0,
+        vx: 0,
+        vy: 1,
+    }
+
+    let pipe = {
+        width: 20,
+        holeStart: 100,
+        holeEnd: 200,
+        x: 500,
+    }
+
+    let gravity = 0.1;
+    let haveYouLost = false;
+    let score = 0;
+
+    function isColliding(px, py, rx, ry, rw, rh) {
+        let isColliding = false;
+
+        if (px < rx) {
+            return false
+        }
+
+        if (py < ry) {
+            return false
+        }
+
+        if (px < rx + rw) {
+            return false
+        }
+
+        if (py > ry + rh) {
+            return false
+        }
+
+        return true
+    }
+
+    function isBirdCollidingWithPipe() {
+        if (isColliding(bird.x, bird.y, pipe.x, 0, pipe.width, pipe.holeStart)) {
+            return true
+        }
+
+        if (isColliding(bird.x, bird.y, pipe.x, pipe.holeEnd, pipe.width, 500 - pipe.holeEnd)) {
+            return true
+        }
+
+        return false
+    }
+
+
+    function draw() {
+        ctx.fillRect(bird.x, bird.y, 10, 10); // x, y starting point, width, height
+
+        ctx.fillRect(pipe.x, 0, pipe.width, pipe.holeStart);
+        ctx.fillRect(pipe.x, pipe.holeEnd, pipe.width, 500 - pipe.holeEnd);
+
+    }
+
+    function clear() {
+        ctx.clearRect(0, 0, 500, 500);  // clear the whole rectangle (500x500) as assigned attributes
+
+    }
+
+    function update() {
+        bird.x += bird.vx
+        bird.y += bird.vy
+
+        bird.vy += gravity
+
+        pipe.x -= (4 + gravity*20)
+
+        if (isBirdCollidingWithPipe()) {
+            haveYouLost = true;
+            alert("your score was " + score)
+        }
+
+        if (bird.y < 0 || bird.y > 500) {
+            haveYouLost = true;
+            alert("your score was" + score)
+        }
+
+        if (pipe.x < -pipe.width) {
+            pipe.x = 500
+            score ++
+
+            let newHoleStart = Math.random() * 450;
+            let newHoleEnd = newHoleStart + Math.random() * 50 + 50;
+
+            pipe.holeEnd = newHoleEnd;
+            pipe.holeStart = newHoleStart;
+        }
+
+    }
+
+    function frame() {
+        if (haveYouLost) {
+            return
+        }
+        update()
+        clear()
+        draw()
+
+    }
+
+    setInterval(frame, 1000 / 60); //wait 1000ms between each second
+
+    function onKeyPress(){    //this is an event handler; they give parameters to the function onKeyPress(e)
+        bird.vy = -5;
+    }
+
+    document.addEventListener("keydown", onKeyPress) // "keydown" is a name of the event in JS,
+                                    // when this event is triggered, JS will call the function
+                                    // (input the function as a parameter, don't call / use ()!!
+
+</script>
